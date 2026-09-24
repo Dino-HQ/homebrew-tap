@@ -1,0 +1,54 @@
+# Follows Dino-HQ/dino releases: regenerates the formula, proves it installs, commits it.
+name: update
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to pin (default: the latest release)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # main
+
+      - name: Regenerate the formula
+        id: gen
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          scripts/update-formula.sh "${VERSION}"
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prove it installs
+        if: steps.gen.outputs.changed == 'true'
+        run: |
+          brew audit --strict dino-hq/tap/dino
+          brew install dino-hq/tap/dino
+          brew test dino-hq/tap/dino
+
+      - name: Commit
+        if: steps.gen.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's|.*/releases/download/v\([^/]*\)/.*|\1|p' Formula/dino.rb | head -1)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "dino ${version}"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
