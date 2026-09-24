@@ -12,4 +12,4 @@ Upgrade with `brew upgrade dino`. Other ways to install: [usedino.dev/docs/insta
 
 ## Maintenance
 
-`.github/workflows/update.yml` checks for a new release every 6 hours (or run it by hand with a version). It runs `scripts/update-formula.sh`, proves the formula with `brew audit --strict`, `brew install` and `brew test`, and commits it. `tests.yml` installs and tests the formula on macOS and Linux, arm64 and x64, for every push and PR.
+`.github/workflows/update.yml` checks for a new release every 6 hours (or run it by hand with a version). It runs `scripts/update-formula.sh`, proves the formula with `brew audit --strict`, `brew install` and `brew test`, and commits it. `tests.yml` installs and tests the formula on macOS (Apple Silicon and Intel) and Linux x64 for every push and PR. Both use only GitHub-owned actions and the Homebrew preinstalled on GitHub's runners.

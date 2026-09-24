@@ -9,15 +9,29 @@ on:
 permissions:
   contents: read
 
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_ENV_HINTS: 1
+
 jobs:
   formula:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        os: [macos-latest, macos-15-intel, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # main
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Put brew on PATH (preinstalled on GitHub's Linux runners)
+        if: runner.os == 'Linux'
+        run: echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+
+      - name: Tap this checkout
+        run: brew tap dino-hq/tap "$GITHUB_WORKSPACE"
+
       - run: brew style dino-hq/tap
       - run: brew audit --strict dino-hq/tap/dino
       - run: brew install dino-hq/tap/dino

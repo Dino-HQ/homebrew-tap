@@ -17,11 +17,15 @@ concurrency:
   group: update
   cancel-in-progress: false
 
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_ENV_HINTS: 1
+
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # main
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Regenerate the formula
         id: gen
@@ -32,23 +36,23 @@ jobs:
           if git diff --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
+            version=$(sed -n 's|.*/releases/download/v\([^/]*\)/.*|\1|p' Formula/dino.rb | head -1)
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -qam "dino ${version}"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Prove it installs
         if: steps.gen.outputs.changed == 'true'
         run: |
+          echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+          export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+          brew tap dino-hq/tap "$GITHUB_WORKSPACE"
           brew audit --strict dino-hq/tap/dino
           brew install dino-hq/tap/dino
           brew test dino-hq/tap/dino
 
-      - name: Commit
+      - name: Push
         if: steps.gen.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          version=$(sed -n 's|.*/releases/download/v\([^/]*\)/.*|\1|p' Formula/dino.rb | head -1)
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "dino ${version}"
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+        run: git push origin HEAD:main
