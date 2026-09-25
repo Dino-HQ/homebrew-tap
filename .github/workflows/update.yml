@@ -9,6 +9,10 @@ on:
       version:
         description: 'Version to pin (default: the latest release)'
         required: false
+  # Sent by the Dino release pipeline (Dino-HQ/project-dino release-sync.yml) as soon as a
+  # release is complete, with client_payload.version. The schedule above stays as a safety net.
+  repository_dispatch:
+    types: [dino-released]
 
 permissions:
   contents: write
@@ -30,8 +34,18 @@ jobs:
       - name: Regenerate the formula
         id: gen
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ inputs.version || github.event.client_payload.version }}
+          EVENT: ${{ github.event_name }}
         run: |
+          # A dispatched version never moves the formula backwards (e.g. a recovery re-run of an
+          # older release). A manual run with an explicit version can still pin any version.
+          current=$(sed -n 's|.*/releases/download/v\([^/]*\)/.*|\1|p' Formula/dino.rb | head -1)
+          if [ "${EVENT}" = "repository_dispatch" ] && [ -n "${current}" ] && \
+             [ "$(printf '%s\n%s\n' "${current}" "${VERSION}" | sort -V | tail -1)" != "${VERSION}" ]; then
+            echo "Formula is at ${current}; not moving it back to ${VERSION}."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           scripts/update-formula.sh "${VERSION}"
           if git diff --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
