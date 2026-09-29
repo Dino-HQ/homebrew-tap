@@ -5,28 +5,28 @@ class Dino < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.1/dino-darwin-arm64"
-      sha256 "ab33fcda7952d02a285c707547c9666b9324e1bc5d904f776dcce401c5e50d0e"
+      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.2/dino-darwin-arm64"
+      sha256 "5c3e0eb4af9ce83e0f796673f0f5e0c2648af943a3b9ae8edafd3cbb921f6ef9"
     end
     on_intel do
-      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.1/dino-darwin-x64"
-      sha256 "74b406007e9d27f22770294019cb4b3bc8e79f0fd1e888d6659214fce522fe49"
+      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.2/dino-darwin-x64"
+      sha256 "067ad276e092ddbeaa05d5144fd250f22c6258095f5d8c9c0ae76432b9096ccf"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.1/dino-linux-arm64"
-      sha256 "47e280063016634e79bb96ad86e276736eee449eecd01e2d9d20b682ca800f7d"
+      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.2/dino-linux-arm64"
+      sha256 "74196ce08c69aae20155a87f9529352448a63590f5f7d0779fc9e103ed915374"
     end
     on_intel do
-      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.1/dino-linux-x64"
-      sha256 "9451aa3000b2890565ecd714210edce2ac1c0c42565e59a6e0cbcb0934746da4"
+      url "https://github.com/Dino-HQ/dino/releases/download/v1.2.2/dino-linux-x64"
+      sha256 "77973ad8566482d07c988ea86491ffb0779d519b7460173d0a8b7ca743a7c017"
 
       # The default x64 build needs AVX2; older CPUs get the baseline build.
       resource "baseline" do
-        url "https://github.com/Dino-HQ/dino/releases/download/v1.2.1/dino-linux-x64-baseline"
-        sha256 "70026163b46cf4099d6237409a8b26f8254ee9281394cb067ec366dc27043183"
+        url "https://github.com/Dino-HQ/dino/releases/download/v1.2.2/dino-linux-x64-baseline"
+        sha256 "f44117d47037fb4e89a9c8d0f36e5895a040c13df612a900c6d5c6283178166a"
       end
     end
   end
